@@ -26,8 +26,9 @@ namespace n3 {
 
 	};
 
-	template<size_t ...M, size_t ...T>
-	auto merge(Index_seq<M...> &&i, Index_seq<T...> &&ii) -> Index_seq<M..., T...>
+
+	template<size_t ...T, size_t ...M>
+	auto merge(Index_seq<T...> &&i, Index_seq<M...> &&ii) -> Index_seq<M..., T...>
 	{
 		Index_seq<M..., T...> v;
 		return v;
@@ -36,7 +37,7 @@ namespace n3 {
 	template<size_t N>
 	struct Make_index_seq
 	{
-		using type = decltype(merge(std::declval< typename Make_index_seq<N - 2>::type >(), std::declval< Index_seq<N - 2, N - 1>>()));
+		using type = decltype( merge( declval<typename Make_index_seq<N - 2>::type>(), declval< Index_seq<N - 2, N - 1> >() ) );
 	};
 
 
@@ -120,13 +121,93 @@ namespace n4 {
 	void test()
 	{
 		Test<6,7,8,4,2,1> b;
-		cout << get_wws<2>(b)  << endl;
+		cout << get_wws<4>(b)  << endl;
 	}
 }
 
+
+namespace n5 {
+	template<typename ...T>
+	struct w_tup;
+
+	template<>
+	struct w_tup<> {
+		typedef w_tup<> My_t;
+	};
+
+	template<typename _This,typename ...Afters>
+	struct w_tup<_This, Afters...> : private w_tup<Afters ...>
+	{
+		typedef _This this_type;
+		typedef w_tup<_This, Afters...> My_t;
+		typedef w_tup<Afters...> Base_t;
+		
+		static const size_t _Mysize = 1 + sizeof...(Afters);
+
+		_This _Myfirst;
+		
+		constexpr w_tup() : Base_t(),_Myfirst()
+		{
+
+		}
+
+		constexpr w_tup(const _This &th,const Afters& ...Afters_arg) : Base_t(Afters_arg...),_Myfirst(th){
+		
+		}
+
+		Base_t& getBase()
+		{
+			return (*this);
+		}
+	};
+
+	template<typename ...L>
+	struct sub;
+
+	template<typename T,typename ...L>
+	struct sub <w_tup<T,L...> >{
+			using type = w_tup<L...>;
+	};
+
+	template<size_t N,typename T>
+	struct hhh {
+		using type = typename hhh<N - 1, typename sub<T>::type >::type;
+	};
+
+	template<typename T>
+	struct hhh<0,T> {
+		using type = T;
+	};
+
+	template<size_t N,typename ...T>
+	auto w_get(w_tup<T...> &t) 
+	{
+		typedef typename hhh<N, w_tup<T...> >::type TYPE;
+		auto a = reinterpret_cast<TYPE&>(t.getBase());
+		return a._Myfirst;
+	} 
+
+	template<typename ...T>
+	auto make_w_tup(T...arg) -> w_tup<T...>
+	{
+		w_tup<T...> t (arg...) ;
+		return t;
+	}
+	
+	void test()
+	{
+		auto a = make_w_tup( 78,'a',"sl",90.1,78,'j');
+		auto b = w_get<2>(a);
+		cout << b << endl;
+	}
+
+}
+
+
 int main()
 {
-	n2::test();
+	n5::test();
+
 	system("pause");
 	return 0;
 }
