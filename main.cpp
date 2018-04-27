@@ -372,6 +372,64 @@ namespace n8 {
 			std::cout << "Test(Test &&) " <<p << std::endl;
 			//std::cout << "Test(Test &&) " << p << std::endl;
 		}
+		Test& operator=(const Test& t)
+		{
+			if (this == &t)
+			{
+				std::cout << "same" << "\n";
+				return *this;
+			}
+				
+			if (!t.p)
+			{
+				return *this;
+			}
+			if (p)
+			{
+				delete[] p;
+			}
+			int len = strlen(t.p) + 1;
+			p = new char[len];
+			strcpy_s(p, len, t.p);
+			std::cout << "operator=(const Test& t) " << p << std::endl;
+
+			return *this;
+		}
+
+		Test& operator=(Test&& t)
+		{
+			if (this == &t)
+				return *this;
+			if (!t.p)
+			{
+				return *this;
+			}
+			if (p)
+			{
+				delete[] p;
+			}
+			p = t.p;
+			t.p = nullptr;
+			std::cout << "operator=(Test&& t) " << p << std::endl;
+
+			return *this;
+		}
+
+		bool operator>(Test& t)
+		{
+			return strcmp(this->p, t.p) > 0;
+		}
+
+		bool operator<(Test& t)
+		{
+			return strcmp(this->p, t.p) < 0;
+		}
+
+		operator const char *()
+		{
+			return this->p;
+		}
+
 		~Test()
 		{
 			
@@ -395,7 +453,8 @@ namespace n8 {
 
 	void test()
 	{
-		Test t = g();
+		std::vector<Test> v;
+		v.push_back("jkjk");
 	}
 }
 
@@ -521,12 +580,148 @@ namespace n10 {
 				break;
 		}
 	}
+}
 
+namespace n11 {
+	template<typename T>
+	void swap(T* t1, T* t2)
+	{
+		T temp = *t1;
+		*t1 = *t2;
+		*t2 = std::move(temp);
+	}
+
+	template<typename T>
+	void adjustHeap(int now_i,int len,T* arr)
+	{
+		T temp = arr[now_i];
+		int k = now_i * 2 + 1;
+		for (; k < len; k = k * 2 + 1)
+		{
+			if (k + 1< len && arr[k] < arr[k + 1])
+			{
+				k = k + 1;
+			}
+			if (arr[k]>temp)
+			{
+				arr[now_i] = arr[k];
+				now_i = k;
+			}
+			else {
+				break;
+			}
+		}
+		arr[now_i] = std::move(temp);
+	}
+
+	template<typename T>
+	void heapSort(T* arr, int len)
+	{
+		int i = len / 2 - 1;
+		for (; i >= 0; --i)
+		{
+			adjustHeap(i, len, arr);
+		}
+		
+		int j = len - 1;
+		for (; j > 0; --j)
+		{
+			swap(&(arr[0]), &(arr[j]));
+			adjustHeap(0, j, arr);
+		}
+	}
+	int getCharLen(int n)
+	{
+		int len = 0;
+		while (n > 0)
+		{
+			++len;
+			n /= 10;
+		}
+		return len;
+	}
+	int getCharLen(const char *n)
+	{
+		return strlen(n);
+	}
+	template<size_t N,char SP,typename T> 
+	void print_center(T& n)
+	{
+		int len = getCharLen(n);
+		int q = (N - len) / 2;
+		int w = N - len - q;
+		for (int i = 0; i < q; ++i)
+		{
+			printf("%c", SP);
+		}
+		std::cout << n;
+		for (int i = 0; i < w; ++i)
+		{
+			printf("%c", SP);
+		}
+	}
+	template<typename T>
+	void printHeap(T *arr, int len)
+	{
+		int j = 1;
+		int ls = 0;
+		int lines = 0;
+		while( ls <= len){
+			ls = ls + j;
+			lines = lines + 1;
+			j = j * 2;
+		}
+		int spaces = ((ls - 1) / 2);
+		int mid_spaces = 0;
+		int ns = 1;
+		int now = 0;
+		for (int m = 0; m < lines;++m) {
+			for (int n = 0; n < spaces; ++n){
+				printf("     ");
+			}
+			for (int n = 0; n < ns; ++n){
+				if (now >= len) {
+					break;
+				}
+				print_center<5,' '>(arr[now]);
+
+				for (int s = 0; s < mid_spaces;++s) {
+					printf("     ");
+				}
+				now = now + 1;
+			}
+			printf("\n");
+			ns = ns * 2;
+			mid_spaces = spaces;
+			spaces = (spaces - 1) / 2;
+		}
+	}
+	
+	template<typename T>
+	struct ARR_LEN;
+
+	template<typename T,size_t N>
+	struct ARR_LEN<T[N]> {
+		const static int value = N;
+	};
+
+#define Len(arr) ARR_LEN<decltype(arr)>::value
+
+	void test()
+	{
+		//int arr[] = { 7,9,4,1,0,5,65,90,12,100,2,1,11,111,765,121,56,123,87,12,32 };
+		n8::Test arr[] = { "klk","asd","opop","u87","oopo","ll","abcd","mnb","lol","dota2"};
+	
+		printHeap(arr, Len(arr));
+		heapSort(arr, Len(arr));
+		printHeap(arr, Len(arr));
+	}
+#undef Len
 }
 
 int main()
 {
-	n10::test();
+	n11::test();
 
 	system("pause");
 	return 0;
