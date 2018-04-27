@@ -614,7 +614,7 @@ namespace n11 {
 		}
 		arr[now_i] = std::move(temp);
 	}
-
+	
 	template<typename T>
 	void heapSort(T* arr, int len)
 	{
@@ -645,7 +645,12 @@ namespace n11 {
 	{
 		return strlen(n);
 	}
-	template<size_t N,char SP,typename T> 
+	template<typename T>
+	struct print_center_support
+	{
+		static const bool value = std::is_same<int, T>::value || std::is_same<const char *, T>::value || std::is_same<const char *,decltype((const char *)std::declval<T&>())>::value;
+	};
+	template<size_t N,char SP,typename T,typename = std::enable_if_t<print_center_support<T>::value> >
 	void print_center(T& n)
 	{
 		int len = getCharLen(n);
@@ -708,9 +713,9 @@ namespace n11 {
 
 	void test()
 	{
-		//int arr[] = { 7,9,4,1,0,5,65,90,12,100,2,1,11,111,765,121,56,123,87,12,32 };
-		n8::Test arr[] = { "klk","asd","opop","u87","oopo","ll","abcd","mnb","lol",
-			"dota2","°¡","wws","pop","menu","upup"};
+		int arr[] = { 7,9,4,1,0,5,65,90,12,100,2,1,11,111,765,121,56,123,87,12,32 };
+		//float arr[] = { 1.8f,2.54f,0.9f,0.01f,122.f,89.11f };
+		//n8::Test arr[] = { "klk","asd","opop","u87","oopo","ll","abcd","mnb","lol","dota2","°¡","wws","pop","menu","upup"};
 	
 		printHeap(arr, Len(arr));
 		heapSort(arr, Len(arr));
@@ -718,9 +723,34 @@ namespace n11 {
 	}
 }
 
+namespace n12 {
+	template<typename T>
+	void dec(T t)
+	{
+		std::cout << t << "\n";
+	}
+
+	template<typename T,typename ...Arg>
+	void dec(T t,Arg ...arg)
+	{
+		std::cout << t << "\n";
+		dec<Arg...>(arg...);
+	}
+
+	template<typename ...T>
+	void kk(T ...k)
+	{
+		dec<T...>(k...);
+	}
+	void test()
+	{
+		kk(78,7,8);
+	}
+}
+
 int main()
 {
-	n11::test();
+	n12::test();
 
 	system("pause");
 	return 0;
