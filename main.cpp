@@ -514,6 +514,7 @@ HHH
 #include <conio.h>
 #include <Windows.h>
 #define M_PI 3.14159265358979323846
+#define Len(arr) n11::ARR_LEN<decltype(arr)>::value
 
 namespace n10 {
 
@@ -705,18 +706,16 @@ namespace n11 {
 		const static int value = N;
 	};
 
-#define Len(arr) ARR_LEN<decltype(arr)>::value
-
 	void test()
 	{
 		//int arr[] = { 7,9,4,1,0,5,65,90,12,100,2,1,11,111,765,121,56,123,87,12,32 };
-		n8::Test arr[] = { "klk","asd","opop","u87","oopo","ll","abcd","mnb","lol","dota2"};
+		n8::Test arr[] = { "klk","asd","opop","u87","oopo","ll","abcd","mnb","lol",
+			"dota2","°¡","wws","pop","menu","upup"};
 	
 		printHeap(arr, Len(arr));
 		heapSort(arr, Len(arr));
 		printHeap(arr, Len(arr));
 	}
-#undef Len
 }
 
 int main()
