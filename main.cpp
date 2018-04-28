@@ -199,6 +199,13 @@ namespace n5 {
 		
 		}
 
+		constexpr w_tup(const My_t &tup) : Base_t(tup.getBase()), _Myfirst(tup.getFirst()) {
+
+		}
+		constexpr w_tup(My_t &&tup) : Base_t(std::move(tup.getBase())), _Myfirst(std::move(tup.getFirst())) {
+			
+		}
+
 		Base_t& getBase()
 		{
 			return (*this);
@@ -247,10 +254,10 @@ namespace n5 {
 	void test()
 	{
 		auto a = make_w_tup( 78,'a',"sl",90.1,78,'j',std::string("aaaaaa"));
-		auto &b = w_get<6>(a);
 		w_get<6>(a).append("sajdak");
-		
-		std::cout << b << std::endl;
+		auto b = std::move(a);
+		std::cout << w_get<6>(b) << std::endl;
+		std::cout << w_get<1>(a) << std::endl;
 	}
 
 }
@@ -730,7 +737,7 @@ namespace n12 {
 	void dec(T t,Arg ...arg)
 	{
 		std::cout << t << "\n";
-		if constexpr(sizeof...(Arg) > 1)
+		if constexpr(sizeof...(Arg) > 0)
 		{
 			dec<Arg...>(arg...);
 		}
@@ -743,13 +750,13 @@ namespace n12 {
 	}
 	void test()
 	{
-		kk(90, 89.f, 8999, '22');
+		kk(90, 89.90f, 8999, "2klkl");
 	}
 }
 
 int main()
 {
-	n11::test();
+	n5::test();
 
 	system("pause");
 	return 0;
