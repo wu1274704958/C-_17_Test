@@ -650,9 +650,10 @@ namespace n11 {
 	{
 		static const bool value = std::is_same<int, T>::value || std::is_same<const char *, T>::value || std::is_same<const char *,decltype((const char *)std::declval<T&>())>::value;
 	};
-	template<size_t N,char SP,typename T,typename = std::enable_if_t<print_center_support<T>::value> >
+	template<size_t N,char SP,typename T >
 	void print_center(T& n)
 	{
+		static_assert(print_center_support<T>::value,"Not Support Type!!!");
 		int len = getCharLen(n);
 		int q = (N - len) / 2;
 		int w = N - len - q;
@@ -713,9 +714,9 @@ namespace n11 {
 
 	void test()
 	{
-		int arr[] = { 7,9,4,1,0,5,65,90,12,100,2,1,11,111,765,121,56,123,87,12,32 };
+		//int arr[] = { 7,9,4,1,0,5,65,90,12,100,2,1,11,111,765,121,56,123,87,12,32 };
 		//float arr[] = { 1.8f,2.54f,0.9f,0.01f,122.f,89.11f };
-		//n8::Test arr[] = { "klk","asd","opop","u87","oopo","ll","abcd","mnb","lol","dota2","°¡","wws","pop","menu","upup"};
+		n8::Test arr[] = { "klk","asd","opop","u87","oopo","ll","abcd","mnb","lol","dota2","°¡","wws","pop","menu","upup"};
 	
 		printHeap(arr, Len(arr));
 		heapSort(arr, Len(arr));
@@ -724,17 +725,15 @@ namespace n11 {
 }
 
 namespace n12 {
-	template<typename T>
-	void dec(T t)
-	{
-		std::cout << t << "\n";
-	}
 
 	template<typename T,typename ...Arg>
 	void dec(T t,Arg ...arg)
 	{
 		std::cout << t << "\n";
-		dec<Arg...>(arg...);
+		if constexpr(sizeof...(Arg) > 1)
+		{
+			dec<Arg...>(arg...);
+		}
 	}
 
 	template<typename ...T>
@@ -744,13 +743,13 @@ namespace n12 {
 	}
 	void test()
 	{
-		kk(78,7,8);
+		kk(90, 89.f, 8999, '22');
 	}
 }
 
 int main()
 {
-	n12::test();
+	n11::test();
 
 	system("pause");
 	return 0;
