@@ -461,7 +461,8 @@ namespace n8 {
 	void test()
 	{
 		std::vector<Test> v;
-		v.push_back("jkjk");
+		Test t = Test("jkjk");
+		v.push_back(std::move(t));
 	}
 }
 
@@ -655,7 +656,7 @@ namespace n11 {
 	template<typename T>
 	struct print_center_support
 	{
-		static const bool value = std::is_same<int, T>::value || std::is_same<const char *, T>::value || std::is_same<const char *,decltype((const char *)std::declval<T&>())>::value;
+		static const bool value = std::is_same<int, T>::value || std::is_same<const char *, T>::value || std::is_same<const char *, decltype((const char *)std::declval<T&>())>::value;
 	};
 	template<size_t N,char SP,typename T >
 	void print_center(T& n)
@@ -754,10 +755,82 @@ namespace n12 {
 	}
 }
 
+#include <mutex>
+#include <memory>
+#include <utility>
+
+namespace n13 {
+	inline std::mutex m;
+	template<size_t N>
+	void func(int &a)
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			{
+				std::lock_guard<std::mutex> lock(m);
+				if constexpr(N == 0)
+				{
+					std::cout << "+ " << a++ << "\n";
+				}
+				else
+				{
+					std::cout << "- " << a-- << "\n";
+				}
+			}
+		}
+	}
+	static int a = 50;
+	
+	void test()
+	{
+		for (int i = 0; i < 10; ++i)
+		{
+			system("cls");
+			std::thread t1(func<0>, std::ref(a));
+			std::thread t2(func<1>, std::ref(a));
+
+			t1.detach();
+			t2.detach();
+			std::this_thread::sleep_for(std::chrono::seconds::duration(1));
+			std::cout << a << "\n";
+		}
+		
+	}
+}
+
+namespace n14{
+	template<class T>
+	void kk(T&& t)
+	{
+		if constexpr(std::is_same<decltype(std::forward<T>(t)), n8::Test>::value)
+		{
+			std::cout << "n8::Test" << std::endl;
+		}else if constexpr(std::is_same<decltype(std::forward<T>(t)), n8::Test&>::value)
+		{
+			std::cout << "n8::Test&" << std::endl;
+		}
+		else if constexpr(std::is_same<decltype(std::forward<T>(t)), n8::Test&&>::value)
+		{
+			std::cout << "n8::Test&&" << std::endl;
+		}
+	}
+	void test()
+	{
+		n8::Test t("jkk");
+		std::tuple<n8::Test&> tup(t);
+
+		t.p[0] = 'p';
+
+		std::cout << std::get<0>(tup) << std::endl;
+
+		//kk(t);
+	}
+}
+
 int main()
 {
-	n5::test();
-
+	
+	n14::test();
 	system("pause");
 	return 0;
 }
