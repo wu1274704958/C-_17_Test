@@ -140,7 +140,7 @@ namespace n2 {
 				break;
 			}
 
-			std::cout << fibonacci(num, n3::make_index_seq<60>()) << std::endl;
+			std::cout << "½á¹û£º"<< fibonacci(num, n3::make_index_seq<90>()) << std::endl;
 		}
 	}
 }
@@ -491,6 +491,7 @@ namespace n9 {
 	};
 
 HHH
+
 #undef HHH
 
 	template<typename T>
@@ -814,23 +815,111 @@ namespace n14{
 			std::cout << "n8::Test&&" << std::endl;
 		}
 	}
+	
 	void test()
 	{
 		n8::Test t("jkk");
 		std::tuple<n8::Test&> tup(t);
 
 		t.p[0] = 'p';
-
+		
 		std::cout << std::get<0>(tup) << std::endl;
 
 		//kk(t);
 	}
 }
 
+namespace n15 {
+	struct Test {
+		int a;
+		std::function<void()> f;
+		void setF(std::function<void()> fun)
+		{
+			f = fun;
+		}
+		void operator()() {
+			if (f)
+				f();
+		}
+		~Test()
+		{
+			std::cout << "~Test() " << a << "\n";
+		}
+	};
+
+	void test()
+	{
+		std::shared_ptr<Test> t1(new Test());
+		std::shared_ptr<Test> t2(new Test());
+		t1->a = 1;
+		t2->a = 2;
+		t1->setF([t2] {
+			
+			{
+				std::cout << "klkl" << t2->a << "\n";
+			}
+		});
+		std::cout << t2.use_count() << std::endl;
+		t1->operator()();
+	}
+}
+
+namespace n16 {
+	template<typename T>
+	struct Test2 {
+		static_assert(std::is_same<int, T>::value);
+		template<typename U>
+		void show(U&& u)
+		{
+			std::cout << u << std::endl;
+		}
+	};
+
+	struct Test {
+		static int j;
+		int f;
+		char k;
+	};
+	int Test::j = 9;
+	template<typename T,typename U>
+	void kk(T t,U u)
+	{
+		using Type = typename decltype(t.second);
+		std::cout << typeid(Type).name() << std::endl;
+		std::cout << u.*(t.second) << std::endl;
+	}
+
+	void test()
+	{
+		Test2<int> t2;
+		t2.show<char>('b');
+		using PS_TYPE = typename decltype(&Test2<int>::show<char>);
+		std::cout << typeid(PS_TYPE).name() << std::endl;
+		PS_TYPE ps = &Test2<int>::show;
+		std::cout << ps << std::endl;
+		(t2.*(ps))('c');
+		Test t;
+		t.f = 9;
+		t.k = 'a';
+		std::pair<int, decltype(&Test::k)> p(2,&Test::k);
+		kk(p,t);
+
+		float res = 0.f;
+		float sin_n = 0.f;
+		while (sin_n < M_PI)
+		{
+			sin_n += 0.2f;
+			res += sinf(sin_n);
+			printf("res = %f\n", res);
+		}
+
+		printf("res = %f\n", res);
+	}
+}
+
 int main()
 {
-	
-	n14::test();
+	n11::test();
 	system("pause");
 	return 0;
 }
